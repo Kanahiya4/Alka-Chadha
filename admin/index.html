@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Admin Console | Dr. Alka Chadha Keynote Portal</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .admin-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-rose);
+      line-height: 1.1;
+      font-family: var(--font-serif);
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      padding: var(--space-md);
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-rose);
+      border-radius: var(--radius-sm);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: var(--space-xl);
+      box-shadow: var(--shadow-prestige);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    .btn-icon-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-icon-close:hover {
+      color: var(--text-primary);
+    }
+    .action-btn-group {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    .btn-table-action {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+    }
+    .btn-table-action:hover {
+      border-color: var(--accent-rose);
+      color: var(--text-primary);
+    }
+    .btn-table-delete:hover {
+      border-color: var(--accent-crimson);
+      color: var(--accent-crimson);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PIN Security Gate Overlay (Restricted Access) -->
+  <div id="adminPinGate" style="position: fixed; inset: 0; background: var(--bg-primary); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: var(--space-md);">
+    <div style="max-width: 440px; width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-rose); border-radius: var(--radius-sm); padding: var(--space-2xl); box-shadow: var(--shadow-prestige); text-align: center;">
+      <img src="../assets/images/alka-logo.png" alt="Dr. Alka Chadha" style="height: 38px; margin-bottom: var(--space-md);">
+      <h2 style="font-size: 1.35rem; margin-bottom: var(--space-xs); font-family: var(--font-heading); color: var(--text-primary);">Executive Console Access</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; margin-bottom: var(--space-lg);">
+        This management portal is restricted to Dr. Alka Chadha's speaking office and executive team. Enter security PIN to proceed.
+      </p>
+
+      <form id="adminPinForm">
+        <div class="form-group" style="text-align: left; margin-bottom: var(--space-md);">
+          <label for="adminPinInput" class="form-label">Executive Passkey</label>
+          <input type="password" id="adminPinInput" class="form-input" placeholder="••••••••" autocomplete="current-password" required autofocus style="text-align: center; letter-spacing: 0.25em; font-size: 1.25rem;">
+        </div>
+
+        <div id="pinErrorMsg" style="display: none; padding: 8px 12px; background: rgba(158, 42, 43, 0.2); border: 1px solid var(--accent-crimson); border-radius: 4px; color: var(--accent-crimson); font-size: 0.8125rem; margin-bottom: var(--space-md);">
+          Incorrect security passkey. Please try again.
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem;">
+          Unlock Management Console
+        </button>
+
+        <div style="margin-top: var(--space-md); font-size: 0.75rem; color: var(--text-muted);">
+          Protected session &bull; DPDP Act 2023 Compliant
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Header -->
+  <header class="admin-header-bar" role="banner">
+    <div style="display: flex; align-items: center; gap: var(--space-md);">
+      <img src="../assets/images/alka-logo.png" alt="Dr. Alka Chadha Logo" style="height: 34px;">
+      <div>
+        <h1 style="font-size: 1.15rem; margin: 0; line-height: 1.2;">Dr. Alka Chadha: Speaker Console</h1>
+        <div style="font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent-rose); letter-spacing: 0.12em; text-transform: uppercase;">
+          Content, Inquiries & Analytics Hub
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: var(--space-sm);">
+      <a href="../" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" title="View live public website">
+        <span>View Live Site</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
+      <button type="button" class="theme-toggle-btn" aria-label="Toggle visual theme" title="Toggle theme">
+        <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+      <button type="button" id="btnAdminLogout" class="btn btn-secondary btn-sm" title="Lock console session">
+        <span>Lock Session</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-3xl);" role="main">
+
+    <!-- Persistence & GitHub Deployment Advisory Banner -->
+    <div style="background: rgba(201, 138, 155, 0.08); border: 1px solid var(--border-rose); border-radius: var(--radius-xs); padding: 14px 18px; margin-bottom: var(--space-xl); display: flex; align-items: flex-start; gap: 14px;">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="var(--accent-rose)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <div style="font-size: 0.875rem; line-height: 1.5; color: var(--text-secondary);">
+        <strong style="color: var(--text-primary);">Live Browser Preview vs Permanent GitHub Sync:</strong> Additions and edits made here reflect <em>immediately</em> in this browser session. To publish changes permanently to GitHub Pages for global visitors across all devices, visit the <strong>Backup & Data Sync</strong> tab and click <em>"Copy data-store.js"</em> or <em>"Download Full JSON Backup"</em> to commit to your repository.
+      </div>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="admin-stats-row">
+      <div class="stat-card">
+        <div id="statEventsCount" class="stat-number">0</div>
+        <div class="stat-label">Summits & Events</div>
+      </div>
+      <div class="stat-card">
+        <div id="statBlogsCount" class="stat-number">0</div>
+        <div class="stat-label">Articles Published</div>
+      </div>
+      <div class="stat-card">
+        <div id="statWorkshopsCount" class="stat-number">0</div>
+        <div class="stat-label">Active Workshops</div>
+      </div>
+      <div class="stat-card">
+        <div id="statInquiriesCount" class="stat-number" style="color: var(--color-accent);">0</div>
+        <div class="stat-label">Booking Inquiries</div>
+      </div>
+      <div class="stat-card">
+        <div id="statVisitsCount" class="stat-number">0</div>
+        <div class="stat-label">Site Pageviews</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="admin-nav-tabs" role="tablist">
+      <button type="button" class="admin-tab-btn active" data-tab="tab-events" role="tab" aria-selected="true">
+        <span>Summits & Events</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-blogs" role="tab" aria-selected="false">
+        <span>Articles & Blogs</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-workshops" role="tab" aria-selected="false">
+        <span>Workshops & Masterclasses</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-inquiries" role="tab" aria-selected="false">
+        <span>Booking Inquiries</span>
+        <span id="statInquiriesBadge" style="background: var(--accent-rose); color: #fff; padding: 2px 7px; border-radius: 10px; font-size: 0.7rem; margin-left: 6px;">0</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-analytics" role="tab" aria-selected="false">
+        <span>Visitor Analytics</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-sync" role="tab" aria-selected="false">
+        <span>Backup & Data Sync</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: EVENTS & SUMMITS -->
+    <section id="tab-events" class="admin-tab-content">
+      <div class="admin-card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Global Summits & Speaking Engagements</h2>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">Add new speaking tours, completed plenaries, or upcoming conventions.</p>
+          </div>
+          <button type="button" id="btnOpenNewEventModal" class="btn btn-primary btn-sm">
+            <span>+ Add New Event</span>
+          </button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Thumbnail</th>
+                <th>Event / Summit</th>
+                <th>Location & Venue</th>
+                <th>Date / Year</th>
+                <th>Status</th>
+                <th>Keynote Topic</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+              <!-- Rendered via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ARTICLES & BLOG PUBLISHER -->
+    <section id="tab-blogs" class="admin-tab-content" style="display: none;">
+      <div class="admin-card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Authored Articles & Reflections</h2>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">Write and publish insights on leadership, stagecraft, and psychosomatic health.</p>
+          </div>
+          <button type="button" id="btnOpenNewBlogModal" class="btn btn-primary btn-sm">
+            <span>+ Write New Article</span>
+          </button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Cover</th>
+                <th>Title & Category</th>
+                <th>Date</th>
+                <th>Read Time</th>
+                <th>Excerpt Preview</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="blogsTableBody">
+              <!-- Rendered via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: WORKSHOPS -->
+    <section id="tab-workshops" class="admin-tab-content" style="display: none;">
+      <div class="admin-card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Executive Workshops & Masterclasses</h2>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">Configure customized corporate intensives for executive clients.</p>
+          </div>
+          <button type="button" id="btnOpenNewWorkshopModal" class="btn btn-primary btn-sm">
+            <span>+ Add Workshop</span>
+          </button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Title & Tag</th>
+                <th>Target Audience</th>
+                <th>Duration</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="workshopsTableBody">
+              <!-- Rendered via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: BOOKING INQUIRIES -->
+    <section id="tab-inquiries" class="admin-tab-content" style="display: none;">
+      <div class="admin-card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Keynote & Workshop Inquiries</h2>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">Inquiries submitted through the booking page are securely recorded here.</p>
+          </div>
+          <div style="display: flex; gap: var(--space-xs);">
+            <button type="button" id="btnExportInquiriesCSV" class="btn btn-secondary btn-sm">
+              <span>Export Inquiries (CSV)</span>
+            </button>
+            <button type="button" id="btnClearInquiries" class="btn btn-secondary btn-sm" style="border-color: var(--accent-crimson); color: var(--accent-crimson);">
+              <span>Clear List</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: var(--space-md); padding: 12px 16px; background: rgba(212, 175, 55, 0.08); border: 1px solid var(--border-gold-faint); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5;">
+          <strong style="color: var(--accent-gold);">Email Gateway Setup Note:</strong> Inquiries are automatically routed to <code>speaking@shinewithalka.com</code> via FormSubmit. Upon the first booking submission, FormSubmit sends an activation link to that inbox. Click "Activate Form" once to activate live email delivery. All submissions are also permanently captured in the local registry below with instant CSV export and direct WhatsApp coordination.
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date Received</th>
+                <th>Organizer / Planner</th>
+                <th>Organization</th>
+                <th>Target Date</th>
+                <th>City / Location</th>
+                <th>Selected Topic</th>
+                <th>Audience</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inquiriesTableBody">
+              <!-- Rendered via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: VISITOR ANALYTICS & GLOBAL AUDIENCE -->
+    <section id="tab-analytics" class="admin-tab-content" style="display: none;">
+      <div class="admin-card-box" style="margin-bottom: var(--space-xl);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Visitor Analytics & Geographic Audience</h2>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">Privacy-preserving telemetry respecting India's DPDP Act 2023 and GDPR (zero IP storage).</p>
+          </div>
+          <div style="display: flex; gap: var(--space-xs);">
+            <button type="button" id="btnResetAnalytics" class="btn btn-secondary btn-sm">
+              <span>Reset Local Counters</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Analytics Overview Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
+          <div style="padding: var(--space-md); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs);">
+            <div id="analyticsTotalViews" style="font-size: 1.75rem; font-weight: 700; color: var(--accent-rose); font-family: var(--font-serif);">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;">Total Pageviews</div>
+          </div>
+          <div style="padding: var(--space-md); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs);">
+            <div id="analyticsUniqueVisitors" style="font-size: 1.75rem; font-weight: 700; color: var(--accent-gold); font-family: var(--font-serif);">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;">Unique Visitors</div>
+          </div>
+          <div style="padding: var(--space-md); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs);">
+            <div id="analyticsTopCountry" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">India</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;">Primary Territory</div>
+          </div>
+          <div style="padding: var(--space-md); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs);">
+            <div id="analyticsDeviceSplit" style="font-size: 1.125rem; font-weight: 600; color: var(--text-secondary); margin-top: 6px;">--</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;">Device Breakdown</div>
+          </div>
+        </div>
+
+        <!-- 2-Column: Countries & Popular Pages -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-xl); margin-bottom: var(--space-xl);">
+          <!-- Country Breakdown -->
+          <div>
+            <h3 style="font-size: 1.05rem; margin-bottom: var(--space-sm); color: var(--text-primary);">Visitor Breakdown by Country</h3>
+            <div id="countriesBreakdownContainer" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Rendered via admin.js -->
+            </div>
+          </div>
+
+          <!-- Top Visited Pages -->
+          <div>
+            <h3 style="font-size: 1.05rem; margin-bottom: var(--space-sm); color: var(--text-primary);">Most Visited Content Pages</h3>
+            <div id="pagesBreakdownContainer" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Rendered via admin.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream: Recent Activity -->
+        <h3 style="font-size: 1.05rem; margin-bottom: var(--space-sm); color: var(--text-primary);">Recent Anonymous Visitor Log</h3>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Time (UTC/Local)</th>
+                <th>Country</th>
+                <th>Device</th>
+                <th>Entry Page</th>
+                <th>Traffic Source</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsRecentTableBody">
+              <!-- Rendered via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Third-Party Enterprise Analytics Integration (Optional) -->
+      <div class="admin-card-box">
+        <h3 style="font-size: 1.15rem; margin-bottom: 4px; color: var(--text-primary);">Optional: Google Analytics 4 & Custom Domain Tag</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: var(--space-md);">
+          If you have a Google Analytics 4 measurement ID (e.g. <code>G-XXXXXXXXXX</code>), enter it here to automatically stream live metrics to your Google Analytics dashboard.
+        </p>
+        <div style="display: flex; gap: var(--space-sm); max-width: 520px; flex-wrap: wrap;">
+          <input type="text" id="inputGoogleAnalyticsId" class="form-input" placeholder="G-XXXXXXXXXX" style="flex: 1; min-width: 220px;">
+          <button type="button" id="btnSaveGaId" class="btn btn-primary btn-sm">Save Measurement ID</button>
+        </div>
+        <div id="gaSavedFeedback" style="font-size: 0.8125rem; color: var(--accent-rose); margin-top: 6px; display: none;"></div>
+      </div>
+    </section>
+
+    <!-- TAB 6: BACKUP & DATA SYNC -->
+    <section id="tab-sync" class="admin-tab-content" style="display: none;">
+      <div class="admin-card-box">
+        <h2 style="font-size: 1.35rem; margin-bottom: var(--space-xs);">Backup, Export & GitHub Repository Sync</h2>
+        <p style="font-size: 0.9375rem;">
+          All modifications are stored safely inside your browser's persistent storage. Use this panel to create JSON backups or copy the complete <code>data-store.js</code> file to deploy to GitHub Pages.
+        </p>
+
+        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin: var(--space-xl) 0;">
+          <button type="button" id="btnCopyDataStoreJs" class="btn btn-primary">
+            <span>Copy Master data-store.js</span>
+          </button>
+          <button type="button" id="btnExportData" class="btn btn-secondary">
+            <span>Download Full JSON Backup</span>
+          </button>
+          <label for="importJsonFileInput" class="btn btn-secondary" style="cursor: pointer;">
+            <span>Import JSON File</span>
+            <input type="file" id="importJsonFileInput" accept=".json" style="display: none;">
+          </label>
+          <button type="button" id="btnResetDefaults" class="btn btn-secondary" style="border-color: var(--accent-crimson); color: var(--accent-crimson);">
+            <span>Reset to Factory Master Data</span>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="jsonRawViewer" class="form-label">Live JSON Data Inspector</label>
+          <textarea id="jsonRawViewer" class="form-textarea" rows="10" readonly style="font-family: var(--font-mono); font-size: 0.8125rem;"></textarea>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD / EDIT EVENT -->
+  <div id="eventModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="eventModalTitle">Add New Speaking Event</h3>
+        <button type="button" class="btn-icon-close js-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="eventForm">
+        <input type="hidden" id="eventId">
+
+        <div class="form-group">
+          <label for="eventTitle" class="form-label">Summit / Event Title *</label>
+          <input type="text" id="eventTitle" class="form-input" required placeholder="e.g. World Leadership Congress 2026">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+          <div class="form-group">
+            <label for="eventVenue" class="form-label">Venue / Convention Center *</label>
+            <input type="text" id="eventVenue" class="form-input" required placeholder="e.g. Marina Bay Sands">
+          </div>
+          <div class="form-group">
+            <label for="eventCityCountry" class="form-label">City, Country *</label>
+            <input type="text" id="eventCityCountry" class="form-input" required placeholder="e.g. Singapore">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+          <div class="form-group">
+            <label for="eventDate" class="form-label">Date String *</label>
+            <input type="text" id="eventDate" class="form-input" required placeholder="e.g. November 2026">
+          </div>
+          <div class="form-group">
+            <label for="eventStatus" class="form-label">Status *</label>
+            <select id="eventStatus" class="form-select">
+              <option value="upcoming">Upcoming Summit</option>
+              <option value="completed">Past Speaking Engagement</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="eventTopic" class="form-label">Keynote Topic / Presentation *</label>
+          <input type="text" id="eventTopic" class="form-input" required placeholder="e.g. We Are Rivers, Not Rocks">
+        </div>
+
+        <div class="form-group">
+          <label for="eventDescription" class="form-label">Brief Description</label>
+          <textarea id="eventDescription" class="form-textarea" rows="3" placeholder="Key aspects of the plenary and audience profile"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="eventImage" class="form-label">Featured Image URL</label>
+          <input type="text" id="eventImage" class="form-input" placeholder="../assets/images/stage-plenary-orator.jpg">
+          <div style="display: flex; gap: var(--space-xs); margin-top: 6px; align-items: center; flex-wrap: wrap;">
+            <label class="btn btn-secondary btn-sm" style="cursor: pointer; font-size: 0.75rem; padding: 4px 10px;">
+              <span>Upload Local Photo</span>
+              <input type="file" class="js-local-file-input" data-target="eventImage" accept="image/*" style="display: none;">
+            </label>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">or pick from Dr. Alka's stage archive below:</span>
+          </div>
+          <div class="preset-chip-grid" data-target="eventImage">
+            <div class="preset-chip" data-src="../assets/images/stage-convention-speaking.jpg">
+              <img src="../assets/images/stage-convention-speaking.jpg" alt="Convention Stage">
+              <span>Convention Stage</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/stage-plenary-orator.jpg">
+              <img src="../assets/images/stage-plenary-orator.jpg" alt="Plenary Orator">
+              <span>Plenary Orator</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/stage-australia-global.jpg">
+              <img src="../assets/images/stage-australia-global.jpg" alt="Australia PSA">
+              <span>Australia PSA</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/stage-executive-address.jpg">
+              <img src="../assets/images/stage-executive-address.jpg" alt="Executive Address">
+              <span>Executive Address</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/event-gsa-germany.jpg">
+              <img src="../assets/images/event-gsa-germany.jpg" alt="GSA Germany">
+              <span>GSA Germany</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/hero-stage-portrait.webp">
+              <img src="../assets/images/hero-stage-portrait.webp" alt="Stage Portrait">
+              <span>Stage Portrait</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
+          <button type="button" class="btn btn-secondary btn-sm js-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT BLOG -->
+  <div id="blogModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="blogModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="blogModalTitle">Write & Publish Article</h3>
+        <button type="button" class="btn-icon-close js-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="blogForm">
+        <input type="hidden" id="blogId">
+
+        <div class="form-group">
+          <label for="blogTitle" class="form-label">Article Title *</label>
+          <input type="text" id="blogTitle" class="form-input" required placeholder="e.g. The Neurobiology of Executive Calm">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+          <div class="form-group">
+            <label for="blogCategory" class="form-label">Category *</label>
+            <select id="blogCategory" class="form-select">
+              <option value="Leadership & Stagecraft">Leadership & Stagecraft</option>
+              <option value="Psychosomatic Science">Psychosomatic Science</option>
+              <option value="Executive Health">Executive Health</option>
+              <option value="Keynote Reflections">Keynote Reflections</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="blogReadTime" class="form-label">Estimated Read Time *</label>
+            <input type="text" id="blogReadTime" class="form-input" required placeholder="e.g. 5 min read">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="blogExcerpt" class="form-label">Excerpt / Teaser Hook *</label>
+          <textarea id="blogExcerpt" class="form-textarea" rows="2" required placeholder="One to two sentences summarizing the core revelation"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="blogContent" class="form-label">Full Article Body (Paragraphs) *</label>
+          <textarea id="blogContent" class="form-textarea" rows="8" required placeholder="Type the full article content here. Separate paragraphs with blank lines."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="blogImage" class="form-label">Featured Image URL</label>
+          <input type="text" id="blogImage" class="form-input" placeholder="../assets/images/stage-plenary-orator.jpg">
+          <div style="display: flex; gap: var(--space-xs); margin-top: 6px; align-items: center; flex-wrap: wrap;">
+            <label class="btn btn-secondary btn-sm" style="cursor: pointer; font-size: 0.75rem; padding: 4px 10px;">
+              <span>Upload Local Photo</span>
+              <input type="file" class="js-local-file-input" data-target="blogImage" accept="image/*" style="display: none;">
+            </label>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">or pick from Dr. Alka's photography library:</span>
+          </div>
+          <div class="preset-chip-grid" data-target="blogImage">
+            <div class="preset-chip" data-src="../assets/images/stage-plenary-orator.jpg">
+              <img src="../assets/images/stage-plenary-orator.jpg" alt="Plenary Orator">
+              <span>Plenary Orator</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/keynote-issues-tissues.jpg">
+              <img src="../assets/images/keynote-issues-tissues.jpg" alt="Issues into Tissues">
+              <span>Issues into Tissues</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/book-brain-health.jpg">
+              <img src="../assets/images/book-brain-health.jpg" alt="Care About Brain">
+              <span>Care About Brain</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/stage-convention-speaking.jpg">
+              <img src="../assets/images/stage-convention-speaking.jpg" alt="Convention Stage">
+              <span>Convention Stage</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/stage-australia-global.jpg">
+              <img src="../assets/images/stage-australia-global.jpg" alt="Australia Tour">
+              <span>Australia Tour</span>
+            </div>
+            <div class="preset-chip" data-src="../assets/images/Book-Holding-Photo.jpg">
+              <img src="../assets/images/Book-Holding-Photo.jpg" alt="Book Holding">
+              <span>Book Holding</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
+          <button type="button" class="btn btn-secondary btn-sm js-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Publish Article</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT WORKSHOP -->
+  <div id="workshopModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="workshopModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="workshopModalTitle">Add Executive Workshop</h3>
+        <button type="button" class="btn-icon-close js-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="workshopForm">
+        <input type="hidden" id="workshopId">
+
+        <div class="form-group">
+          <label for="workshopTitle" class="form-label">Workshop Title *</label>
+          <input type="text" id="workshopTitle" class="form-input" required placeholder="e.g. Non-Defensive Leadership Masterclass">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+          <div class="form-group">
+            <label for="workshopTag" class="form-label">Format Tag *</label>
+            <input type="text" id="workshopTag" class="form-input" required placeholder="e.g. Half-Day Intensive">
+          </div>
+          <div class="form-group">
+            <label for="workshopDuration" class="form-label">Duration *</label>
+            <input type="text" id="workshopDuration" class="form-input" required placeholder="e.g. 4 Hours (In-Person)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="workshopAudience" class="form-label">Target Audience *</label>
+          <input type="text" id="workshopAudience" class="form-input" required placeholder="e.g. C-Suite & Board Members">
+        </div>
+
+        <div class="form-group">
+          <label for="workshopDesc" class="form-label">Curriculum Synopsis *</label>
+          <textarea id="workshopDesc" class="form-textarea" rows="4" required placeholder="Detailed summary of experiential outcomes"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
+          <button type="button" class="btn btn-secondary btn-sm js-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Workshop</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VIEW INQUIRY DETAILS -->
+  <div id="inquiryModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inquiryModalTitle">
+    <div class="modal-box" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="inquiryModalTitle">Booking Inquiry Details</h3>
+        <button type="button" class="btn-icon-close js-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="inquiryModalContent" style="line-height: 1.7; font-size: 0.9375rem; color: var(--text-secondary);">
+        <!-- Injected via admin.js -->
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-xl);">
+        <button type="button" class="btn btn-secondary btn-sm js-modal-close">Close</button>
+        <a id="btnInquiryReplyMailto" href="#" class="btn btn-primary btn-sm">Reply via Email</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="adminToast" class="toast-notification" role="status" aria-live="polite">
+    <span id="toastMessage">Changes saved successfully</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/data-store.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>
